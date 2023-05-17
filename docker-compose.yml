@@ -1,0 +1,68 @@
+version: "3.8"
+services:
+  app:
+    build:
+      args:
+        user: admin
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    image: face-info
+    container_name: face-info-app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+    networks:
+      - face-info-network
+
+  db:
+    platform: linux/amd64
+    image: mysql
+    container_name: face-info-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    ports:
+      - 3306:3306
+    volumes:
+      - db:/var/lib/mysql
+      - ./docker-compose/mysql/is.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - face-info-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: face-info-nginx
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    volumes:
+      - ./:/var/www
+      - ./docker-compose/nginx:/etc/nginx/conf.d/
+    networks:
+      - face-info-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: face-info-rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ./docker-compose/rabbitmq/data/:/var/lib/rabbitmq/
+      - ./docker-compose/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - face-info-network
+
+networks:
+  face-info-network:
+    driver: bridge
+
+volumes:
+  db:
