@@ -23,4 +23,5 @@ composer install
 ````
 exec php App/Jobs/FaceInfoJob/Listener.php &
 ````
-- Отправляем запросы **GET**, **POST** и получаем ответы по ссылке http://localhost:8000
+- Для отправки запроса на обработку фотографии, делаем POST запрос, с содержимым типа multipart/form-data, с полями name и photo на адрес http://localhost:8000
+- Для получения результата обработки, делаем GET запрос, с обычным query параметром task_id
