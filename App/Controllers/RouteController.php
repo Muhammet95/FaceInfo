@@ -18,13 +18,19 @@ class RouteController
      */
     public function get(Request $request, Response $response, $args)
     {
-        $task_id = $request->getQueryParams()['task_id'];
+        try {
+            $task_id = $request->getQueryParams()['task_id'];
 
-        $service = new GetService((int)$task_id);
-        $result = $service->getResult();
+            $service = new GetService((int)$task_id);
+            $result = $service->getResult();
 
-        $response->getBody()->write(json_encode($result));
-        return $response->withHeader('Content-Type', 'application/json');
+            $response->getBody()->write(json_encode($result));
+            return $response->withHeader('Content-Type', 'application/json');
+        } catch (Exception $exception) {
+            $response->getBody()->write(json_encode(['message' => 'Ошибка запроса']));
+            return $response->withHeader('Content-Type', 'application/json')
+                ->withStatus(500);
+        }
     }
 
     /**
@@ -44,7 +50,7 @@ class RouteController
             $response->getBody()->write(json_encode($result));
             return $response->withHeader('Content-Type', 'application/json');
         } catch (Exception $exception) {
-            $response->getBody()->write(json_encode(['message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]));
+            $response->getBody()->write(json_encode(['message' => $exception->getMessage()]));
             return $response->withStatus(500);
         }
     }
